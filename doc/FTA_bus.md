@@ -32,27 +32,41 @@ fta_cmd_response128_t <- this structure is the response bus for a 128-bit bus
 ## Requests
 There are numerous signals on the request bus. Signals that are not used should be de-asserted.
 Some hi-lights:
-'cyc' indicates a valid cycle. The slave and bus bridges will only process requests with 'cyc' asserted. Anything else will be ignored.
-'tid' is the transaction id for the request. It has three sub-fields for the core number, channel number, and transaction id.
-'cmd' indicates the operation to perform. This is typically a 'LOAD' or 'STORE', but it may be other operations useful for atomic memory operations.
-'vadr' is the virtual address used to place the data.
-'padr' is the physical address used to place the data. 'vadr' and 'padr' may be the same if virtual addresses are not used.
-'data1' is the first data element to be transferred for a storage type operation.
-'data2' is a second data element to be transferred for atomic operations like 'CAS'.
-'sel' indicates which portions of the data field are valid. There is a select line for each byte of the data field.
+|Signal|Description|
+|------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+|'cyc'| indicates a valid cycle. The slave and bus bridges will only process requests with 'cyc' asserted. Anything else will be ignored.|
+|'tid'| is the transaction id for the request. It has three sub-fields for the core number, channel number, and transaction id.|
+|'cmd'| indicates the operation to perform. This is typically a 'LOAD' or 'STORE', but it may be other operations useful for atomic memory operations.|
+|'vadr'| is the virtual address used to place the data.|
+|'padr'| is the physical address used to place the data. 'vadr' and 'padr' may be the same if virtual addresses are not used.|
+|'data1'| is the first data element to be transferred for a storage type operation.|
+|'data2'| is a second data element to be transferred for atomic operations like 'CAS'.|
+|'sel' |indicates which portions of the data field are valid. There is a select line for each byte of the data field.|
 
 ## Responses
 All responses, including MSI interrupts and other error responses, must have the 'ack' signal of the response bus asserted. This is how the master knows there is a response to be processed.
-Responses indicate a successful transfer using the 'err' signal. A value of 'OKAY' indicates the transfer was successful. Other values indicate a bus error or interrupt.
-Responses should place read data on the 'dat' field of the bus.
-The 'tid' field of a response must match the 'tid' field of the request.
-The 'adr' field of the response should reflect the physical address of the request. This is to aid a master in sorting responses.
+|Signal|Description|
+|------|------------------------------------------------------------------------------------------|
+|'ack'|This signal indicates a valid response.|
+|'err'|Responses indicate a successful transfer using the 'err' signal. A value of 'OKAY' indicates the transfer was successful. Other values indicate a bus error or interrupt.|
+|'dat'|Responses should place read data on the 'dat' field of the bus.|
+|'tid'|The 'tid' field of a response must match the 'tid' field of the request.|
+|'adr'|The 'adr' field of the response should reflect the physical address of the request. This is to aid a master in sorting responses.|
+
 For store operations (CLASSIC bus cycles), there does not need to be a response.
 
 ## MSI - Message Signalled Interrupts
 FTA bus provides for message signalled interrupts. A MSI interrupt transfers the required information to the master without needing the master to request it. This trims cycle time off an interrupt request.
 There is a response code ('IRQ') on the response bus to support message signalled interrupts. A slave may place an IRQ message on a response bus (the 'err' field) to interrupt the master.
-The bus master monitors responses for IRQ requests. The slave places an 8-bit error code, 4-bit interrupt priority and target core information on the data response signals. 
+|Signal|Description|
+|------|------------------------------------------------------------------------------------------|
+|'ack'|This signal indicates a valid response; should be high for MSI|
+|'err'|value = IRQ|
+|'dat'|Interrupt message data. Typically 32-bits|
+|'tid'|The coreno should reflect the target core servicing the interrupt. A core number of 63 indicates a broadcast interrupt.|
+|'adr'|The 'adr' field of the response indicates the bus/device/function generating the interrupt.|
+
+The bus master monitors responses for IRQ requests. The slave places an 8-bit error code, 4-bit interrupt priority and target core information on the response signals (in the message dat). The bus/device/function is placed in the response address field.
 
 ## Component Discovery
 FTA bus is still evolving. Used in association with the bus is a device or component discovery black-box (DDBB). The device discovery black-box allows a device's address and other associated controls to be programmatically controlled.
