@@ -35,6 +35,8 @@
 //
 package video_pkg;
 
+endpackage
+
 interface video_bus;
 	logic clk;
 	logic hsync;
@@ -44,8 +46,7 @@ interface video_bus;
 	logic [31:0] data;
 
 	modport in (input clk, hsync, vsync, blank, border, data);
-	modport out (output clk, hsync, vsync, bank, border, data);
+	modport out (output clk, hsync, vsync, blank, border, data);
 
 endinterface
 
-endpackage
