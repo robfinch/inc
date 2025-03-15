@@ -1,6 +1,6 @@
 // ============================================================================
 //        __
-//   \\__/ o\    (C) 2015-2024  Robert Finch, Waterloo
+//   \\__/ o\    (C) 2015-2025  Robert Finch, Waterloo
 //    \  __ /    All rights reserved.
 //     \/_//     robfinch<remove>@finitron.ca
 //       ||
@@ -50,7 +50,7 @@
 //
 package fta_bus_pkg;
 
-typedef logic [31:0] fta_address_t;
+typedef logic [39:0] fta_address_t;
 typedef logic [5:0] fta_burst_len_t;		// number of beats in a burst -1
 typedef logic [3:0] fta_channel_t;			// channel for devices like system cache
 //typedef logic [7:0] fta_tranid_t;			// transaction id
@@ -80,6 +80,7 @@ typedef enum logic [2:0] {
 	ERC = 3'b101,						// record errors on write
 	IRQA = 3'b110,					// interrupt acknowledge
 	EOB = 3'b111						// end of data burst
+//	SYNCLASS = 4'b1000				// synchronous classic
 } fta_cycle_type_t;
 
 typedef enum logic [2:0] {
@@ -107,9 +108,10 @@ typedef enum logic [3:0] {
 	penta = 4'd4,
 	octa = 4'd5,
 	hexi = 4'd6,
-	n96 = 4'd7,
-	char = 4'd8,
-	vect = 4'd10
+	dhexi = 4'd7,
+	n96 = 4'd8,
+	char = 4'd9,
+	vect = 4'd11
 } fta_size_t;
 
 typedef enum logic [2:0] {
@@ -302,7 +304,9 @@ typedef struct packed {
 	fta_address_t vadr;		// virtual address
 	fta_address_t padr;		// physical address
 	logic [31:0] sel;			// byte lane selects
-	logic [255:0] dat;		// data
+	logic ctag;						// capabilities tag bit
+	logic [255:0] data1;		// data
+	logic [255:0] data2;		// data
 	fta_tranid_t tid;			// transaction id
 	logic csr;						// set or clear reservation we:1=clear 0=set
 	fta_key_t [3:0] key;	// access keys
@@ -442,6 +446,7 @@ typedef struct packed {
 	fta_error_t err;			// error
 	fta_priority_t pri;		// response priority
 	fta_address_t adr;
+	logic ctag;						// capabilities tag bit
 	logic [255:0] dat;		// data
 } fta_cmd_response256_t;
 
@@ -457,6 +462,24 @@ typedef struct packed {
 	fta_address_t adr;
 	logic [511:0] dat;		// data
 } fta_cmd_response512_t;
+
+
+typedef struct packed
+{
+	// in the address field (40 bits)
+	logic [5:0] pri;
+	logic [1:0] stkndx;
+	logic [15:0] segment;
+	logic [7:0] bus;
+	logic [4:0] device;
+	logic [2:0] func;
+	// in the data field
+	logic [7:0] resv2;
+	logic [5:0] irq_coreno;
+	logic [1:0] om;
+	logic [3:0] resv1;
+	logic [11:0] vecno;
+} fta_imessage_t;			// 72 bits
 
 function fnFtaAllocate;
 input fta_cache_t typ;
@@ -489,3 +512,75 @@ end
 endfunction
 
 endpackage
+
+interface fta_bus_interface;
+
+	parameter DATA_WIDTH = 256;
+	parameter VADR_WIDTH = 32;
+	parameter PADR_WIDTH = 32;
+
+  // Global signals
+  logic clk;
+  logic rst;
+
+	// Request signals
+	typedef struct packed {
+	fta_bus_pkg::fta_operating_mode_t om;	// operating mode
+	fta_bus_pkg::fta_cmd_t cmd;					// command
+	fta_bus_pkg::fta_burst_type_t bte;	// burst type extension
+	fta_bus_pkg::fta_cycle_type_t cti;	// cycle type indicator
+	fta_bus_pkg::fta_burst_len_t blen;	// length of burst-1
+	fta_bus_pkg::fta_size_t sz;					// transfer size
+	fta_bus_pkg::fta_segment_t seg;			// segment
+	logic cyc;						// valid cycle
+	logic stb;						// data strobe
+	logic we;							// write enable
+	fta_bus_pkg::fta_asid_t asid;				// address space identifier
+	logic [VADR_WIDTH-1:0] vadr;		// virtual address
+	logic [PADR_WIDTH-1:0] padr;		// physical address
+	logic [DATA_WIDTH/8-1:0] sel;			// byte lane selects
+	logic ctag;						// capabilities tag bit
+	logic [DATA_WIDTH-1:0] data1;	// data
+	logic [DATA_WIDTH-1:0] data2;	// data
+	fta_bus_pkg::fta_tranid_t tid;			// transaction id
+	logic csr;						// set or clear reservation we:1=clear 0=set
+	fta_bus_pkg::fta_key_t [3:0] key;	// access keys
+	fta_bus_pkg::fta_priv_level_t pl;		// privilege level
+	fta_bus_pkg::fta_priority_t pri;		// transaction priority
+	fta_bus_pkg::fta_cache_t cache;			// cache and buffer properties
+	} req_t;
+
+	// Reponse signals
+	typedef struct packed {
+	fta_bus_pkg::fta_asid_t asid;				// address space identifier
+	fta_bus_pkg::fta_tranid_t tid;			// transaction id
+	logic stall;					// stall pipeline
+	logic next;						// advance to next transaction
+	logic ack;						// response acknowledge
+	logic rty;						// retry
+	fta_bus_pkg::fta_error_t err;			// error
+	fta_bus_pkg::fta_priority_t pri;		// response priority
+	logic [PADR_WIDTH-1:0] adr;
+	logic ctag;						// capabilities tag bit
+	logic [DATA_WIDTH-1:0] dat;		// data
+	} resp_t;
+	
+	req_t req;
+	resp_t resp;
+
+	modport master (input rst, clk, output req, input resp);
+	modport slave (input rst, clk, input req, output resp);
+/*
+	modport master(output m_om, m_cmd, m_bte, m_cti, m_blen, m_sz, m_seg, m_cyc, m_stb,
+		m_we, m_asid, m_vadr, m_padr, m_sel, m_ctag, m_data1, m_data2, m_tid, m_csr,
+		m_key, m_pl, m_pri, m_cache,
+		input s_asid, s_tid, s_stall, s_next, s_ack, s_rty, s_err, s_pri, s_adr, s_ctag,
+		s_dat);	
+	modport slave(input m_om, m_cmd, m_bte, m_cti, m_blen, m_sz, m_seg, m_cyc, m_stb,
+		m_we, m_asid, m_vadr, m_padr, m_sel, m_ctag, m_data1, m_data2, m_tid, m_csr,
+		m_key, m_pl, m_pri, m_cache,
+		output s_asid, s_tid, s_stall, s_next, s_ack, s_rty, s_err, s_pri, s_adr, s_ctag,
+		s_dat);	
+*/
+endinterface
+
