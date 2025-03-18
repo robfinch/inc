@@ -57,7 +57,7 @@ All responses, including MSI interrupts and other error responses, must have the
 For store operations (CLASSIC bus cycles), there does not need to be a response.
 
 ## MSI - Message Signalled Interrupts
-FTA bus provides for message signaled interrupts. A MSI interrupt transfers the required information to an interrupt controller without needing a request for it. This trims cycle time off an interrupt request. The interrupt controller snoops the CPU response bus for IRQ requests.
+FTA bus provides for message signaled interrupts. A MSI interrupt transfers the required information to an interrupt controller without needing a request for it. This trims cycle time off an interrupt request. A devices slave response bus is used to signal the interrupt, this means that the device does not need a bus mastering port. The interrupt controller snoops the CPU response bus for IRQ requests.
 Up to 62 interrupt controllers may be targeted to process interrupts messages. The interrupt table located in the controller specifies which of 62 target CPU cores to notify of the interrupt. Therefore about 3800 CPU cores may easily be used for interrupt processing.
 There is a response code ('IRQ') on the response bus to support message signaled interrupts. A slave may place an IRQ message on a response bus (the 'err' field) to interrupt the master.
 ### Response Bus with MSI
