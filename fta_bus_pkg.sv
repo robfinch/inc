@@ -466,20 +466,30 @@ typedef struct packed {
 
 typedef struct packed
 {
-	// in the address field (40 bits)
+	// in the tid
+	logic [5:0] icno;
+	logic resv2;
 	logic [5:0] pri;
-	logic [1:0] stkndx;
-	logic [15:0] segment;
+	// in the address field
+	logic [2:0] swstk;
+	logic [13:0] segment;
 	logic [7:0] bus;
 	logic [4:0] device;
 	logic [2:0] func;
 	// in the data field
-	logic [7:0] resv2;
-	logic [5:0] irq_coreno;
+	logic [15:0] data;
 	logic [1:0] om;
-	logic [3:0] resv1;
+	logic [1:0] resv1;
 	logic [11:0] vecno;
-} fta_imessage_t;			// 72 bits
+} fta_imessage_t;				// 77 bits
+
+typedef struct packed
+{
+	logic [7:0] errinfo;
+	logic [12:0] tid;
+	logic [31:0] adr;
+	logic [31:0] dat;
+} fta_imessage2_t;
 
 function fnFtaAllocate;
 input fta_cache_t typ;

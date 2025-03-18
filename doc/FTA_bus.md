@@ -1,4 +1,5 @@
 # FTA Bus
+(c) 2005 Robert Finch
 
 ## Overview
 FTA bus is an asynchronous bus used by me (Finitron) mainly as a system-on-chip bus to interface bus masters and slaves together.
@@ -56,22 +57,79 @@ All responses, including MSI interrupts and other error responses, must have the
 For store operations (CLASSIC bus cycles), there does not need to be a response.
 
 ## MSI - Message Signalled Interrupts
-FTA bus provides for message signalled interrupts. A MSI interrupt transfers the required information to the master without needing the master to request it. This trims cycle time off an interrupt request.
-There is a response code ('IRQ') on the response bus to support message signalled interrupts. A slave may place an IRQ message on a response bus (the 'err' field) to interrupt the master.
+FTA bus provides for message signaled interrupts. A MSI interrupt transfers the required information to an interrupt controller without needing a request for it. This trims cycle time off an interrupt request. The interrupt controller snoops the CPU response bus for IRQ requests.
+Up to 62 interrupt controllers may be targeted to process interrupts messages. The interrupt table located in the controller specifies which of 62 target CPU cores to notify of the interrupt. Therefore about 3800 CPU cores may easily be used for interrupt processing.
+There is a response code ('IRQ') on the response bus to support message signaled interrupts. A slave may place an IRQ message on a response bus (the 'err' field) to interrupt the master.
+### Response Bus with MSI
 |Signal|Description|
 |------|------------------------------------------------------------------------------------------|
 |'ack'|This signal indicates a valid response; should be high for MSI|
 |'err'|value = IRQ|
 |'dat'|Interrupt message data. Typically 32-bits|
-|'tid'|The coreno should reflect the target core servicing the interrupt. A core number of 63 indicates a broadcast interrupt.|
+|'tid'|The coreno should reflect the target core servicing the interrupt. This is an interrupt controller number.|
 |'adr'|The 'adr' field of the response indicates the bus/device/function generating the interrupt.|
 
-The bus master monitors responses for IRQ requests. The slave places an 8-bit error code, 4-bit interrupt priority and target core information on the response signals (in the message dat). The bus/device/function is placed in the response address field.
+### tid field breakdown for MSI
+|Bit|Description|
+|-----|-------------------|
+|0...5| interrupt priority|
+|6...6| reserved|
+|7...12| target irq controller number - a number of 63 indicates a broadcast interrupt. zero is not used|
+
+### dat field breakdown for MSI
+|Bit|Description|
+|------|------------------------|
+|0...10| interrupt vector number|
+|11...13| reserved|
+|14...15| operating mode required|
+|16...31| data to be placed in interrupt table|
+
+### adr field breakdown for MSI
+|Bit|Description|
+|-----|---------|
+|0...2| FTA func|
+|3...7| FTA device|
+|8...15| FTA bus|
+|16...28| FTA segment|
+|29...31| index for required software stack|
+
+The interrupt controller monitors responses for IRQ requests. The slave places interrupt information on the response signals as outlined above.
 
 ## Component Discovery
 FTA bus is still evolving. Used in association with the bus is a device or component discovery black-box (DDBB). The device discovery black-box allows a device's address and other associated controls to be programmatically controlled.
 Ths DDBB is modelled after the same ideas behind popular device discovery, search for "pci" on the web. The discovery component is called a black-box component because it is just plugged into any device needing it without modification.
-The DDBB's themselves are allocated in a 256MB memory mapped region. They follow the device/bus/function addressing. Each DDBB is allocated it's own 4kB block of memory.
+The DDBB's themselves are allocated in a 512MB memory mapped region. They follow the device/bus/function addressing. Each DDBB is allocated it's own 8kB block of memory. The first 1kB is allocated for registers, the last 7kB may contain a ROM image associated with the device.
+|Regno|Description|
+|-----|----------------------|
+| 00  | Device and Vendor IDs|
+| 04  | command and status reg|
+| 08  | BAR0 base address register #0|
+| 0C  | BAR1 base address register #1|
+| 10  | BAR2 base address register #2|
+| 14  | BAR3 base address register #3|
+| 18  | BAR4 base address register #4|
+| 1C	| BAR bits 32 to 63|
+| 40  | IRQ info #0 MSI "dat" field|
+| 44  | IRQ info #0 MSI "adr" field|
+| 48  | IRQ info #0 MSI "tid" field|
+| 4C  | reserved|
+| ... | IRQ info #1 to 2
+| 70  | IRQ info #3 MSI "dat" field|
+| 74  | IRQ info #3 MSI "adr" field|
+| 78  | IRQ info #3 MSI "tid" field|
+| 7C  | reserved|
+
+### command reg
+|Bits|Description|
+|----|-----------|
+|10|interrupt enable|
+
+### status reg
+|Bit|Description|
+|---|-----------|
+|3|interrupt present|
+
+Note that all BAR's share the same upper 32-bits.
 
 ## Examples
 There is a very simple example of use of the FTA bus to drive LEDs called 'ledport_fta32.sv' in the Utility cores repository.
