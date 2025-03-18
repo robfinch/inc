@@ -2,7 +2,7 @@
 (c) 2005 Robert Finch
 
 ## Overview
-FTA bus is an asynchronous bus used by me (Finitron) mainly as a system-on-chip bus to interface bus masters and slaves together.
+FTA bus is an asynchronous bus used by the author (Finitron) mainly as a system-on-chip bus to interface bus masters and slaves together.
 
 ## History
 It evolved from the 'WISHBONE' bus over time as a desire for better bus performance in a complex SoC.
@@ -17,15 +17,15 @@ The slave may respond when it chooses. That could be the next cycle after a requ
 There is a bus transaction id associated with every request and responses. The master must match-up the responses to the requests.
 There is a signal call 'stall' which is not currently implemented, but may be used to stall the bus if needed.
 Requests from a master often traverse a tree-like structure to reach slaves. Typically there are bridges in the SoC to distribute the master's requests and maintain performance. The bridges may also perform bus width conversions.
-For instance the instruction cache has typically a 128-bit read port and may interface to 128-bit wide memories in the system. While some slaves are 32-bit requiring 32-bit accesses.
-Currently the bridges do not break apart a 128-bit access and convert it to multiple 32-bit accesses. Instead a 32-bit access request must be placed on the 128-bit bus.
+For instance the instruction cache has typically a 256-bit read port and may interface to 256-bit wide memories in the system. While some slaves are 32-bit requiring 32-bit accesses.
+Currently the bridges do not break apart a 256-bit access and convert it to multiple 32-bit accesses. Instead a 32-bit access request must be placed on the 256-bit bus.
 
 The bus is relatively fast when compared to a synchronous bus in a complex system. A master may for instance place a burst of accesses on the bus then wait for responses. While waiting for responses another different master may place a burst on the bus.
 A synchronous bus would need to wait for an acknowledgement before proceeding. In a complex system with several bridges that may occupy the entire bus for a number of cycles meaning it could not be used by other devices. A goal of FTA bus is higher bus
 utilization.
 
 There is a collection of structures implementing request and response portions of the bus. There are separate structures for
-each bus size. I found it easier to use than parameterizing the structures. 
+each bus size. The author found it easier to use than parameterizing the structures. 
 
 fta_cmd_request128_t  <- this structure is the request bus for a 128-bit bus
 fta_cmd_response128_t <- this structure is the response bus for a 128-bit bus
