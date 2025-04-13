@@ -50,7 +50,7 @@
 //
 package fta_bus_pkg;
 
-typedef logic [39:0] fta_address_t;
+typedef logic [31:0] fta_address_t;
 typedef logic [5:0] fta_burst_len_t;		// number of beats in a burst -1
 typedef logic [3:0] fta_channel_t;			// channel for devices like system cache
 //typedef logic [7:0] fta_tranid_t;			// transaction id
@@ -177,11 +177,9 @@ typedef struct packed {
 	fta_size_t sz;					// transfer size
 	fta_segment_t seg;			// segment
 	logic cyc;						// valid cycle
-	logic stb;						// data strobe
 	logic we;							// write enable
-	fta_asid_t asid;				// address space identifier
-	fta_address_t vadr;		// virtual address
-	fta_address_t padr;		// physical address
+	fta_address_t pv;			// physical (0) or virtual address (1)
+	fta_address_t adr;		// address
 	logic [7:0] dat;			// data
 	fta_tranid_t tid;			// transaction id
 	logic csr;						// set or clear reservation we:1=clear 0=set
@@ -200,11 +198,9 @@ typedef struct packed {
 	fta_size_t sz;					// transfer size
 	fta_segment_t seg;			// segment
 	logic cyc;						// valid cycle
-	logic stb;						// data strobe
 	logic we;							// write enable
-	fta_asid_t asid;				// address space identifier
-	fta_address_t vadr;		// virtual address
-	fta_address_t padr;		// physical address
+	fta_address_t pv;			// physical (0) or virtual address (1)
+	fta_address_t adr;		// address
 	logic [1:0] sel;			// byte lane selects
 	logic [15:0] dat;			// data
 	fta_tranid_t tid;			// transaction id
@@ -224,11 +220,9 @@ typedef struct packed {
 	fta_size_t sz;					// transfer size
 	fta_segment_t seg;			// segment
 	logic cyc;						// valid cycle
-	logic stb;						// data strobe
 	logic we;							// write enable
-	fta_asid_t asid;				// address space identifier
-	fta_address_t vadr;		// virtual address
-	fta_address_t padr;		// physical address
+	fta_address_t pv;			// physical (0) or virtual address (1)
+	fta_address_t adr;		// address
 	logic [3:0] sel;			// byte lane selects
 	logic [31:0] dat;			// data
 	fta_tranid_t tid;			// transaction id
@@ -248,11 +242,9 @@ typedef struct packed {
 	fta_size_t sz;					// transfer size
 	fta_segment_t seg;			// segment
 	logic cyc;						// valid cycle
-	logic stb;						// data strobe
 	logic we;							// write enable
-	fta_asid_t asid;				// address space identifier
-	fta_address_t vadr;		// virtual address
-	fta_address_t padr;		// physical address
+	fta_address_t pv;			// physical (0) or virtual address (1)
+	fta_address_t adr;		// address
 	logic [7:0] sel;			// byte lane selects
 	logic [63:0] dat;			// data
 	fta_tranid_t tid;			// transaction id
@@ -272,11 +264,9 @@ typedef struct packed {
 	fta_size_t sz;					// transfer size
 	fta_segment_t seg;			// segment
 	logic cyc;						// valid cycle
-	logic stb;						// data strobe
 	logic we;							// write enable
-	fta_asid_t asid;				// address space identifier
-	fta_address_t vadr;		// virtual address
-	fta_address_t padr;		// physical address
+	fta_address_t pv;			// physical (0) or virtual address (1)
+	fta_address_t adr;		// address
 	logic [15:0] sel;			// byte lane selects
 	logic ctag;						// capabilities tag bit
 	logic [127:0] data1;	// data
@@ -298,11 +288,9 @@ typedef struct packed {
 	fta_size_t sz;					// transfer size
 	fta_segment_t seg;			// segment
 	logic cyc;						// valid cycle
-	logic stb;						// data strobe
 	logic we;							// write enable
-	fta_asid_t asid;				// address space identifier
-	fta_address_t vadr;		// virtual address
-	fta_address_t padr;		// physical address
+	fta_address_t pv;			// physical (0) or virtual address (1)
+	fta_address_t adr;		// address
 	logic [31:0] sel;			// byte lane selects
 	logic ctag;						// capabilities tag bit
 	logic [255:0] data1;		// data
@@ -324,11 +312,9 @@ typedef struct packed {
 	fta_size_t sz;					// transfer size
 	fta_segment_t seg;			// segment
 	logic cyc;						// valid cycle
-	logic stb;						// data strobe
 	logic we;							// write enable
-	fta_asid_t asid;				// address space identifier
-	fta_address_t vadr;		// virtual address
-	fta_address_t padr;		// physical address
+	fta_address_t pv;			// physical (0) or virtual address (1)
+	fta_address_t adr;		// address
 	logic [63:0] sel;			// byte lane selects
 	logic [511:0] dat;		// data
 	fta_tranid_t tid;			// transaction id
@@ -344,7 +330,6 @@ typedef struct packed {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 typedef struct packed {
-	fta_asid_t asid;				// address space identifier
 	fta_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -357,7 +342,6 @@ typedef struct packed {
 } fta_cmd_response8_t;
 
 typedef struct packed {
-	fta_asid_t asid;				// address space identifier
 	fta_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -370,7 +354,6 @@ typedef struct packed {
 } fta_cmd_response16_t;
 
 typedef struct packed {
-	fta_asid_t asid;				// address space identifier
 	fta_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -383,7 +366,6 @@ typedef struct packed {
 } fta_cmd_response32_t;
 
 typedef struct packed {
-	fta_asid_t asid;				// address space identifier
 	fta_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -396,7 +378,6 @@ typedef struct packed {
 } fta_response32_t;
 
 typedef struct packed {
-	fta_asid_t asid;				// address space identifier
 	fta_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -409,7 +390,6 @@ typedef struct packed {
 } fta_cmd_response64_t;
 
 typedef struct packed {
-	fta_asid_t asid;				// address space identifier
 	fta_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -423,7 +403,6 @@ typedef struct packed {
 } fta_cmd_response128_t;
 
 typedef struct packed {
-	fta_asid_t asid;				// address space identifier
 	fta_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -437,7 +416,6 @@ typedef struct packed {
 } fta_response128_t;
 
 typedef struct packed {
-	fta_asid_t asid;				// address space identifier
 	fta_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -451,7 +429,6 @@ typedef struct packed {
 } fta_cmd_response256_t;
 
 typedef struct packed {
-	fta_asid_t asid;				// address space identifier
 	fta_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -543,11 +520,9 @@ interface fta_bus_interface;
 	fta_bus_pkg::fta_size_t sz;					// transfer size
 	fta_bus_pkg::fta_segment_t seg;			// segment
 	logic cyc;						// valid cycle
-	logic stb;						// data strobe
 	logic we;							// write enable
-	fta_bus_pkg::fta_asid_t asid;				// address space identifier
-	logic [VADR_WIDTH-1:0] vadr;		// virtual address
-	logic [PADR_WIDTH-1:0] padr;		// physical address
+	logic pv;							// physical (0) or virtual address (1)
+	logic [(PADR_WIDTH>VADR_WIDTH?PADR_WIDTH:VADR_WIDTH)-1:0] adr;			// address
 	logic [DATA_WIDTH/8-1:0] sel;			// byte lane selects
 	logic ctag;						// capabilities tag bit
 	logic [DATA_WIDTH-1:0] data1;	// data
@@ -562,7 +537,6 @@ interface fta_bus_interface;
 
 	// Reponse signals
 	typedef struct packed {
-	fta_bus_pkg::fta_asid_t asid;				// address space identifier
 	fta_bus_pkg::fta_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
