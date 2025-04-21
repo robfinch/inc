@@ -78,8 +78,9 @@ typedef struct packed
 	logic [1:0] out;
 	logic [1:0] loaded;
 	logic write_allocate;
-	cpu_types_pkg:rob_ndx_t rndx;
+	cpu_types_pkg::rob_ndx_t rndx;
 	fta_bus_pkg::fta_cmd_request512_t cpu_req;
+	cpu_types_pkg::virtual_address_t req_vadr;
 	fta_bus_pkg::fta_cmd_request256_t [1:0] tran_req;
 } dcache_req_queue_t;
 
