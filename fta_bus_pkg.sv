@@ -566,5 +566,39 @@ interface fta_bus_interface;
 		output s_asid, s_tid, s_stall, s_next, s_ack, s_rty, s_err, s_pri, s_adr, s_ctag,
 		s_dat);	
 */
+	task tCopyRequest;
+	output fta_bus_pkg::fta_cmd_request256_t dst;
+	begin
+		dst = 1000'd0;
+		dst.blen = req.blen;
+		dst.cmd = req.cmd;
+		dst.cyc = req.cyc;
+		dst.we = req.we;
+		dst.sel = req.sel;
+		dst.adr = req.adr;
+		dst.data1 = req.data1;
+	end
+	endtask
+
+	task tCopyResponse;
+	input fta_bus_pkg::fta_cmd_response256_t src;
+	begin
+		resp = 1000'd0;
+		resp.adr = src.adr;
+		resp.dat = src.dat;
+		resp.ack = src.ack;
+	end
+	endtask
+
+	task tCopyResponseTo;
+	output fta_bus_pkg::fta_cmd_response256_t dst;
+	begin
+		dst = 1000'd0;
+		dst.adr = resp.adr;
+		dst.dat = resp.dat;
+		dst.ack = resp.ack;
+	end
+	endtask
+
 endinterface
 
