@@ -51,7 +51,7 @@
 package fta_bus_pkg;
 
 typedef logic [31:0] fta_address_t;
-typedef logic [5:0] fta_burst_len_t;		// number of beats in a burst -1
+typedef logic [7:0] fta_burst_len_t;		// number of beats in a burst -1
 typedef logic [3:0] fta_channel_t;			// channel for devices like system cache
 //typedef logic [7:0] fta_tranid_t;			// transaction id
 typedef logic [7:0] fta_priv_level_t;	// 0=all access,
