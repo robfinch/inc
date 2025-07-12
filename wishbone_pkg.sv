@@ -1,6 +1,6 @@
 // ============================================================================
 //        __
-//   \\__/ o\    (C) 2015-2023  Robert Finch, Waterloo
+//   \\__/ o\    (C) 2015-2025  Robert Finch, Waterloo
 //    \  __ /    All rights reserved.
 //     \/_//     robfinch<remove>@finitron.ca
 //       ||
@@ -36,7 +36,7 @@
 package wishbone_pkg;
 
 typedef logic [31:0] wb_address_t;
-typedef logic [5:0] wb_burst_len_t;		// number of beats in a burst -1
+typedef logic [7:0] wb_burst_len_t;		// number of beats in a burst -1
 typedef logic [3:0] wb_channel_t;			// channel for devices like system cache
 typedef logic [7:0] wb_tranid_t;			// transaction id
 typedef logic [7:0] wb_priv_level_t;	// 0=all access,
@@ -278,9 +278,8 @@ typedef struct packed {
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
-	wb_asid_t asid;				// address space identifier
-	wb_address_t vadr;		// virtual address
-	wb_address_t padr;		// physical address
+	logic pv;							// 0=physical,1=virtual address
+	wb_address_t adr;			// address
 	logic [7:0] dat;			// data
 	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
@@ -301,9 +300,8 @@ typedef struct packed {
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
-	wb_asid_t asid;				// address space identifier
-	wb_address_t vadr;		// virtual address
-	wb_address_t padr;		// physical address
+	logic pv;							// 0=physical,1=virtual address
+	wb_address_t adr;			// address
 	logic [1:0] sel;			// byte lane selects
 	logic [15:0] dat;			// data
 	wb_channel_t cid;			// channel id
@@ -325,9 +323,8 @@ typedef struct packed {
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
-	wb_asid_t asid;				// address space identifier
-	wb_address_t vadr;		// virtual address
-	wb_address_t padr;		// physical address
+	logic pv;							// 0=physical,1=virtual address
+	wb_address_t adr;			// address
 	logic [3:0] sel;			// byte lane selects
 	logic [31:0] dat;			// data
 	wb_channel_t cid;			// channel id
@@ -349,9 +346,8 @@ typedef struct packed {
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
-	wb_asid_t asid;				// address space identifier
-	wb_address_t vadr;		// virtual address
-	wb_address_t padr;		// physical address
+	logic pv;							// 0=physical,1=virtual address
+	wb_address_t adr;			// address
 	logic [7:0] sel;			// byte lane selects
 	logic [63:0] dat;			// data
 	wb_channel_t cid;			// channel id
@@ -373,9 +369,8 @@ typedef struct packed {
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
-	wb_asid_t asid;				// address space identifier
-	wb_address_t vadr;		// virtual address
-	wb_address_t padr;		// physical address
+	logic pv;							// 0=physical,1=virtual address
+	wb_address_t adr;			// address
 	logic [15:0] sel;			// byte lane selects
 	logic [127:0] data1;	// data
 	logic [127:0] data2;	// data
@@ -398,9 +393,8 @@ typedef struct packed {
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
-	wb_asid_t asid;				// address space identifier
-	wb_address_t vadr;		// virtual address
-	wb_address_t padr;		// physical address
+	logic pv;							// 0=physical,1=virtual address
+	wb_address_t adr;			// address
 	logic [31:0] sel;			// byte lane selects
 	logic [255:0] dat;		// data
 	wb_channel_t cid;			// channel id
@@ -422,9 +416,8 @@ typedef struct packed {
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
-	wb_asid_t asid;				// address space identifier
-	wb_address_t vadr;		// virtual address
-	wb_address_t padr;		// physical address
+	logic pv;							// 0=physical,1=virtual address
+	wb_address_t adr;			// address
 	logic [63:0] sel;			// byte lane selects
 	logic [511:0] dat;		// data
 	wb_channel_t cid;			// channel id
@@ -448,7 +441,6 @@ typedef struct packed {
 	logic rty;						// retry
 	logic err;						// error
 	wb_priority_t pri;		// response priority
-	wb_address_t adr;
 	logic [7:0] dat;			// data
 } wb_cmd_response8_t;
 
@@ -461,7 +453,6 @@ typedef struct packed {
 	logic rty;						// retry
 	logic err;						// error
 	wb_priority_t pri;		// response priority
-	wb_address_t adr;
 	logic [15:0] dat;			// data
 } wb_cmd_response16_t;
 
@@ -474,7 +465,6 @@ typedef struct packed {
 	logic rty;						// retry
 	logic err;						// error
 	wb_priority_t pri;		// response priority
-	wb_address_t adr;
 	logic [31:0] dat;			// data
 } wb_cmd_response32_t;
 
@@ -487,7 +477,6 @@ typedef struct packed {
 	logic rty;						// retry
 	logic err;						// error
 	wb_priority_t pri;		// response priority
-	wb_address_t adr;
 	logic [31:0] dat;			// data
 } wb_response32_t;
 
@@ -500,7 +489,6 @@ typedef struct packed {
 	logic rty;						// retry
 	logic err;						// error
 	wb_priority_t pri;		// response priority
-	wb_address_t adr;
 	logic [63:0] dat;			// data
 } wb_cmd_response64_t;
 
@@ -513,7 +501,6 @@ typedef struct packed {
 	logic rty;						// retry
 	logic err;						// error
 	wb_priority_t pri;		// response priority
-	wb_address_t adr;
 	logic [127:0] dat;		// data
 } wb_cmd_response128_t;
 
@@ -526,7 +513,6 @@ typedef struct packed {
 	logic rty;						// retry
 	logic err;						// error
 	wb_priority_t pri;		// response priority
-	wb_address_t adr;
 	logic [127:0] dat;		// data
 } wb_response128_t;
 
@@ -539,7 +525,6 @@ typedef struct packed {
 	logic rty;						// retry
 	logic err;						// error
 	wb_priority_t pri;		// response priority
-	wb_address_t adr;
 	logic [255:0] dat;		// data
 } wb_cmd_response256_t;
 
@@ -552,7 +537,6 @@ typedef struct packed {
 	logic rty;						// retry
 	logic err;						// error
 	wb_priority_t pri;		// response priority
-	wb_address_t adr;
 	logic [511:0] dat;		// data
 } wb_cmd_response512_t;
 
@@ -670,6 +654,67 @@ typedef struct packed
 
 endpackage
 
+interface wb_bus_interface;
+
+	parameter DATA_WIDTH = 256;
+	parameter ADR_WIDTH = 32;
+
+  // Global signals
+  logic clk;
+  logic rst;
+
+	// Request signals
+	typedef struct packed {
+	wishbone_pkg::wb_operating_mode_t om;	// operating mode
+	wishbone_pkg::wb_burst_type_t bte;	// burst type extension
+	wishbone_pkg::wb_cycle_type_t cti;	// cycle type indicator
+	wishbone_pkg::wb_burst_len_t blen;	// length of burst-1
+	wishbone_pkg::wb_segment_t seg;			// segment
+	logic cyc;						// valid cycle
+	logic stb;						// data strobe cycle
+	logic we;							// write enable
+	logic pv;							// physical (0) or virtual address (1)
+	logic [ADR_WIDTH-1:0] adr;			// address
+	logic [DATA_WIDTH/8-1:0] sel;			// byte lane selects
+	logic [DATA_WIDTH-1:0] dat;	// data
+	wishbone_pkg::wb_tranid_t tid;			// transaction id
+	logic csr;						// set or clear reservation we:1=clear 0=set
+	wishbone_pkg::wb_priv_level_t pl;		// privilege level
+	wishbone_pkg::wb_priority_t pri;		// transaction priority
+	wishbone_pkg::wb_cache_t cache;			// cache and buffer properties
+	} req_t;
+
+	// Reponse signals
+	typedef struct packed {
+	wishbone_pkg::wb_tranid_t tid;			// transaction id
+	logic stall;					// stall pipeline
+	logic next;						// advance to next transaction
+	logic ack;						// response acknowledge
+	logic rty;						// retry
+	wishbone_pkg::wb_error_t err;			// error
+	wishbone_pkg::wb_priority_t pri;		// response priority
+	logic [DATA_WIDTH-1:0] dat;		// data
+	} resp_t;
+	
+	req_t req;
+	resp_t resp;
+
+	modport master (input rst, clk, output req, input resp);
+	modport slave (input rst, clk, input req, output resp);
+/*
+	modport master(output m_om, m_cmd, m_bte, m_cti, m_blen, m_sz, m_seg, m_cyc, m_stb,
+		m_we, m_asid, m_vadr, m_padr, m_sel, m_ctag, m_data1, m_data2, m_tid, m_csr,
+		m_key, m_pl, m_pri, m_cache,
+		input s_asid, s_tid, s_stall, s_next, s_ack, s_rty, s_err, s_pri, s_adr, s_ctag,
+		s_dat);	
+	modport slave(input m_om, m_cmd, m_bte, m_cti, m_blen, m_sz, m_seg, m_cyc, m_stb,
+		m_we, m_asid, m_vadr, m_padr, m_sel, m_ctag, m_data1, m_data2, m_tid, m_csr,
+		m_key, m_pl, m_pri, m_cache,
+		output s_asid, s_tid, s_stall, s_next, s_ack, s_rty, s_err, s_pri, s_adr, s_ctag,
+		s_dat);	
+*/
+endinterface
+
 interface wb_request_i #(int WID);
 	wb_burst_type_t bte;		// burst type extension
 	wb_cycle_type_t cti;		// cycle type indicator
@@ -690,7 +735,6 @@ interface wb_request_i #(int WID);
 endinterface
 
 interface wb_response_i #(int WID);
-	wb_channel_t cid;				// channel id
 	wb_tranid_t tid;				// transaction id
 	logic stall;						// stall pipeline
 	logic next;							// advance to next transaction
