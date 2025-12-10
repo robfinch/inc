@@ -337,7 +337,7 @@ typedef struct packed {
 	logic rty;						// retry
 	fta_error_t err;			// error
 	fta_priority_t pri;		// response priority
-//	fta_address_t adr;
+	fta_address_t adr;
 	logic [7:0] dat;			// data
 } fta_cmd_response8_t;
 
@@ -349,7 +349,7 @@ typedef struct packed {
 	logic rty;						// retry
 	fta_error_t err;			// error
 	fta_priority_t pri;		// response priority
-//	fta_address_t adr;
+	fta_address_t adr;
 	logic [15:0] dat;			// data
 } fta_cmd_response16_t;
 
@@ -361,7 +361,7 @@ typedef struct packed {
 	logic rty;						// retry
 	fta_error_t err;			// error
 	fta_priority_t pri;		// response priority
-//	fta_address_t adr;
+	fta_address_t adr;
 	logic [31:0] dat;			// data
 } fta_cmd_response32_t;
 
@@ -373,7 +373,7 @@ typedef struct packed {
 	logic rty;						// retry
 	fta_error_t err;			// error
 	fta_priority_t pri;		// response priority
-//	fta_address_t adr;
+	fta_address_t adr;
 	logic [31:0] dat;			// data
 } fta_response32_t;
 
@@ -385,7 +385,7 @@ typedef struct packed {
 	logic rty;						// retry
 	fta_error_t err;			// error
 	fta_priority_t pri;		// response priority
-//	fta_address_t adr;
+	fta_address_t adr;
 	logic [63:0] dat;			// data
 } fta_cmd_response64_t;
 
@@ -397,7 +397,7 @@ typedef struct packed {
 	logic rty;						// retry
 	fta_error_t err;			// error
 	fta_priority_t pri;		// response priority
-//	fta_address_t adr;
+	fta_address_t adr;
 	logic ctag;						// capabilities tag bit
 	logic [127:0] dat;		// data
 } fta_cmd_response128_t;
@@ -410,7 +410,7 @@ typedef struct packed {
 	logic rty;						// retry
 	fta_error_t err;			// error
 	fta_priority_t pri;		// response priority
-//	fta_address_t adr;
+	fta_address_t adr;
 	logic ctag;						// capabilities tag bit
 	logic [127:0] dat;		// data
 } fta_response128_t;
@@ -423,7 +423,7 @@ typedef struct packed {
 	logic rty;						// retry
 	fta_error_t err;			// error
 	fta_priority_t pri;		// response priority
-//	fta_address_t adr;
+	fta_address_t adr;
 	logic ctag;						// capabilities tag bit
 	logic [255:0] dat;		// data
 } fta_cmd_response256_t;
@@ -436,7 +436,7 @@ typedef struct packed {
 	logic rty;						// retry
 	fta_error_t err;			// error
 	fta_priority_t pri;		// response priority
-//	fta_address_t adr;
+	fta_address_t adr;
 	logic [511:0] dat;		// data
 } fta_cmd_response512_t;
 
@@ -449,7 +449,7 @@ typedef struct packed
 	logic [5:0] pri;
 	// in the address field
 	logic [2:0] swstk;
-	logic [13:0] segment;
+	logic [12:0] segment;
 	logic [7:0] bus;
 	logic [4:0] device;
 	logic [2:0] func;

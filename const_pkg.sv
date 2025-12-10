@@ -13,5 +13,7 @@ package const_pkg;
  parameter INV = `INV;
  parameter HIGH = `HIGH;
  parameter LOW = `LOW;
+ parameter ACK = 1'b1;
+ parameter NACK = 1'b0;
 
 endpackage

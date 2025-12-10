@@ -38,10 +38,15 @@ package wishbone_pkg;
 typedef logic [31:0] wb_address_t;
 typedef logic [7:0] wb_burst_len_t;		// number of beats in a burst -1
 typedef logic [3:0] wb_channel_t;			// channel for devices like system cache
-typedef logic [7:0] wb_tranid_t;			// transaction id
 typedef logic [7:0] wb_priv_level_t;	// 0=all access,
 typedef logic [3:0] wb_priority_t;		// network transaction priority, higher is better
 typedef logic [11:0] wb_asid_t;				// address space identifier
+
+typedef struct packed {
+	logic [5:0] core;
+	logic [2:0] channel;
+	logic [3:0] tranid;
+} wb_tranid_t;
 
 typedef enum logic [1:0] {
 	APP = 2'd0,
@@ -54,6 +59,7 @@ typedef enum logic [2:0] {
 	CLASSIC = 3'b000,
 	FIXED = 3'b001,					// constant data address
 	INCR = 3'b010,					// incrementing data address
+	ERC = 3'b101,						// 
 	IRQA = 3'b110,					// interrupt acknowledge
 	EOB = 3'b111						// end of data burst
 } wb_cycle_type_t;
@@ -85,14 +91,16 @@ typedef enum logic [3:0] {
 	hexi = 4'd6,
 	n96 = 4'd7,
 	char = 4'd8,
+	dhexi = 4'd9,
 	vect = 4'd10
 } wb_size_t;
 
-typedef enum logic [1:0] {
-	OKAY = 2'b00,				// no error
-	DECERR = 2'd01,			// decode error
-	PROTERR = 2'b10,		// security violation
-	ERR = 2'b11					// general error
+typedef enum logic [2:0] {
+	OKAY = 3'b00,				// no error
+	DECERR = 3'd01,			// decode error
+	PROTERR = 3'b10,		// security violation
+	ERR = 3'b11,					// general error
+	IRQ = 3'b111
 } wb_error_t;
 
 typedef enum logic [3:0] {
@@ -147,7 +155,6 @@ typedef struct packed {
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	wb_address_t adr;			// address
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic sr;							// set reservation
 	wb_priv_level_t pl;		// privilege level
@@ -165,7 +172,6 @@ typedef struct packed {
 	logic stb;						// data strobe
 	wb_address_t adr;			// address
 	logic [1:0] sel;			// byte lane select
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic sr;							// set reservation
 	wb_priv_level_t pl;		// privilege level
@@ -183,7 +189,6 @@ typedef struct packed {
 	logic stb;						// data strobe
 	wb_address_t adr;			// address
 	logic [3:0] sel;			// byte lane select
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic sr;							// set reservation
 	wb_priv_level_t pl;		// privilege level
@@ -201,7 +206,6 @@ typedef struct packed {
 	logic stb;						// data strobe
 	wb_address_t adr;			// address
 	logic [7:0] sel;			// byte lane select
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic sr;							// set reservation
 	wb_priv_level_t pl;		// privilege level
@@ -219,7 +223,6 @@ typedef struct packed {
 	logic stb;						// data strobe
 	wb_address_t adr;			// address
 	logic [15:0] sel;			// byte lane select
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic sr;							// set reservation
 	wb_priv_level_t pl;		// privilege level
@@ -237,7 +240,6 @@ typedef struct packed {
 	logic stb;						// data strobe
 	wb_address_t adr;			// address
 	logic [31:0] sel;			// byte lane select
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic sr;							// set reservation
 	wb_priv_level_t pl;		// privilege level
@@ -255,7 +257,6 @@ typedef struct packed {
 	logic stb;						// data strobe
 	wb_address_t adr;			// address
 	logic [63:0] sel;			// byte lane select
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic sr;							// set reservation
 	wb_priv_level_t pl;		// privilege level
@@ -275,6 +276,7 @@ typedef struct packed {
 	wb_burst_len_t blen;	// length of burst-1
 	wb_size_t sz;					// transfer size
 	wb_segment_t seg;			// segment
+	logic lock;
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
@@ -297,6 +299,7 @@ typedef struct packed {
 	wb_burst_len_t blen;	// length of burst-1
 	wb_size_t sz;					// transfer size
 	wb_segment_t seg;			// segment
+	logic lock;
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
@@ -320,6 +323,7 @@ typedef struct packed {
 	wb_burst_len_t blen;	// length of burst-1
 	wb_size_t sz;					// transfer size
 	wb_segment_t seg;			// segment
+	logic lock;
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
@@ -343,6 +347,7 @@ typedef struct packed {
 	wb_burst_len_t blen;	// length of burst-1
 	wb_size_t sz;					// transfer size
 	wb_segment_t seg;			// segment
+	logic lock;
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
@@ -366,6 +371,7 @@ typedef struct packed {
 	wb_burst_len_t blen;	// length of burst-1
 	wb_size_t sz;					// transfer size
 	wb_segment_t seg;			// segment
+	logic lock;
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
@@ -390,6 +396,7 @@ typedef struct packed {
 	wb_burst_len_t blen;	// length of burst-1
 	wb_size_t sz;					// transfer size
 	wb_segment_t seg;			// segment
+	logic lock;
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
@@ -413,6 +420,7 @@ typedef struct packed {
 	wb_burst_len_t blen;	// length of burst-1
 	wb_size_t sz;					// transfer size
 	wb_segment_t seg;			// segment
+	logic lock;
 	logic cyc;						// valid cycle
 	logic stb;						// data strobe
 	logic we;							// write enable
@@ -651,6 +659,41 @@ typedef struct packed
 	wb_cmd_response512_t read;
 	wb_write_response_t write;
 } wb_readwrite_response512_t;
+
+typedef struct packed
+{
+	// in the tid (13 bits)
+	logic [5:0] icno;
+	logic resv2;
+	logic [5:0] pri;
+	// in the address field (32 bits)
+	logic [2:0] swstk;
+	logic [12:0] segment;
+	logic [7:0] bus;
+	logic [4:0] device;
+	logic [2:0] func;
+	// in the data field (32 bits)
+	logic [15:0] data;
+	logic [1:0] om;
+	logic [1:0] resv1;
+	logic [11:0] vecno;
+} wb_imessage_t;				// 77 bits
+
+function fnWbAllocate;
+input wb_cache_t typ;
+begin
+	fnWbAllocate =
+		typ==wishbone_pkg::CACHEABLE_NB ||
+		typ==wishbone_pkg::CACHEABLE ||
+		typ==wishbone_pkg::WT_READ_ALLOCATE ||
+		typ==wishbone_pkg::WT_WRITE_ALLOCATE ||
+		typ==wishbone_pkg::WT_READWRITE_ALLOCATE ||
+		typ==wishbone_pkg::WB_READ_ALLOCATE ||
+		typ==wishbone_pkg::WB_WRITE_ALLOCATE ||
+		typ==wishbone_pkg::WB_READWRITE_ALLOCATE
+		;
+end
+endfunction
 
 endpackage
 
