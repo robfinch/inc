@@ -48,6 +48,15 @@ typedef struct packed {
 	logic [3:0] tranid;
 } wb_tranid_t;
 
+// Interrupt message transaction id.
+typedef struct packed
+{
+	logic [5:0] icno;										// destination interrupt controller number
+	logic resv;													// reserved
+	logic [5:0] pri;										// interrupt priority level
+} wb_itranid_t;
+
+
 typedef enum logic [1:0] {
 	APP = 2'd0,
 	SUPERVISOR = 2'd1,
@@ -441,7 +450,6 @@ typedef struct packed {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 typedef struct packed {
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -453,7 +461,6 @@ typedef struct packed {
 } wb_cmd_response8_t;
 
 typedef struct packed {
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -465,7 +472,6 @@ typedef struct packed {
 } wb_cmd_response16_t;
 
 typedef struct packed {
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -477,7 +483,6 @@ typedef struct packed {
 } wb_cmd_response32_t;
 
 typedef struct packed {
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -489,7 +494,6 @@ typedef struct packed {
 } wb_response32_t;
 
 typedef struct packed {
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -501,7 +505,6 @@ typedef struct packed {
 } wb_cmd_response64_t;
 
 typedef struct packed {
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -513,7 +516,6 @@ typedef struct packed {
 } wb_cmd_response128_t;
 
 typedef struct packed {
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -525,7 +527,6 @@ typedef struct packed {
 } wb_response128_t;
 
 typedef struct packed {
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -537,7 +538,6 @@ typedef struct packed {
 } wb_cmd_response256_t;
 
 typedef struct packed {
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -557,7 +557,6 @@ typedef struct packed {
 // have a common structure.
 
 typedef struct packed {
-	wb_channel_t cid;			// channel id
 	wb_tranid_t tid;			// transaction id
 	logic stall;					// stall pipeline
 	logic next;						// advance to next transaction
@@ -663,20 +662,11 @@ typedef struct packed
 typedef struct packed
 {
 	// in the tid (13 bits)
-	logic [5:0] icno;
-	logic resv2;
-	logic [5:0] pri;
-	// in the address field (32 bits)
-	logic [2:0] swstk;
-	logic [12:0] segment;
-	logic [7:0] bus;
-	logic [4:0] device;
-	logic [2:0] func;
+	wb_itranid_t tid;			// destination interrupt controller number and priority
 	// in the data field (32 bits)
-	logic [15:0] data;
-	logic [1:0] om;
-	logic [1:0] resv1;
-	logic [11:0] vecno;
+	logic [9:0] data;										// additional data
+	logic [9:0] devndx;									// device index, who done it
+	logic [11:0] vecno;									// vector number
 } wb_imessage_t;				// 77 bits
 
 function fnWbAllocate;
